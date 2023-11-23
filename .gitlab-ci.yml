@@ -1,0 +1,52 @@
+default:
+  tags: [bradamar]
+
+stages:
+  - build
+  - stylecheck
+  - testingT
+  - deploy
+
+building:
+  stage: build
+  script:
+    - cd src/cat
+    - make s21_cat
+    - cd ../grep
+    - make s21_grep
+  after_script:
+    - bash src/bot_telegram.sh
+  artifacts:
+    paths:
+      - src/cat/s21_cat
+      - src/grep/s21_grep
+    expire_in: 30 days
+
+style_test:
+  stage: stylecheck
+  script:
+    - cd src/cat
+    - make style
+    - cd ../grep
+    - make style
+  after_script:
+    - bash src/bot_telegram.sh
+
+testing:
+  stage: testingT
+  script:
+    - cd src/cat
+    - make test
+    - cd ../grep
+    - make test
+  after_script:
+    - bash src/bot_telegram.sh
+
+deployment:
+  stage: deploy
+  script:
+    - bash src/deploy.sh
+  after_script:
+    - bash src/bot_telegram.sh
+  allow_failure: false
+  when: manual
